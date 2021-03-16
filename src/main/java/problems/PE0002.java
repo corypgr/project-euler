@@ -1,3 +1,5 @@
+package problems;
+
 /**
  * Problem 2
  *
