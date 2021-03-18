@@ -1,5 +1,8 @@
 package problems;
 
+import util.Problem;
+import util.ProblemSolution;
+
 /**
  * Problem 6
  *
@@ -9,14 +12,19 @@ package problems;
  * sum of a list of integers (increasing by 1) is: ((first + end) * (size / 2)). I'll apply this, but it won't affect
  * runtime significantly.
  */
-public class PE0006 {
+public class PE0006 implements Problem {
     private static final long MAX_VAL = 100L;
 
-    public static void main(String[] args) {
+    @Override
+    public ProblemSolution solve() {
         long sumOfSquares = getSumOfSquares();
         long squareOfSum = getSquareOfSum();
 
-        System.out.println("Difference: " + (squareOfSum - sumOfSquares));
+        long solution = (squareOfSum - sumOfSquares);
+        return ProblemSolution.builder()
+                .solution(solution)
+                .descriptiveSolution("Difference: " + solution)
+                .build();
     }
 
     private static long getSumOfSquares() {

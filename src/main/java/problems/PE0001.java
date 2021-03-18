@@ -1,5 +1,8 @@
 package problems;
 
+import util.Problem;
+import util.ProblemSolution;
+
 import java.util.HashSet;
 
 /**
@@ -16,8 +19,10 @@ import java.util.HashSet;
  * particularly large set of numbers to compute we could use a bit vector or
  * some other optimization to avoid the large memory footprint.
  */
-public class PE0001 {
-    public static void main(String[] args) {
+public class PE0001 implements Problem {
+
+    @Override
+    public ProblemSolution solve() {
         HashSet<Integer> multiples = new HashSet<Integer>();
 
         for (int i = 3; i < 1000; i += 3) {
@@ -32,6 +37,9 @@ public class PE0001 {
                 .mapToInt(Integer::intValue)
                 .sum();
 
-        System.out.println("Sum: " + sum);
+        return ProblemSolution.builder()
+                .solution(sum)
+                .descriptiveSolution("Sum: " + sum)
+                .build();
     }
 }

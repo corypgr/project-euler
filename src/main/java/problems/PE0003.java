@@ -1,6 +1,8 @@
 package problems;
 
 import prime.PrimeGenerator;
+import util.Problem;
+import util.ProblemSolution;
 
 import java.util.List;
 
@@ -12,9 +14,11 @@ import java.util.List;
  * So we need to find the Prime factors of this number, which means we need to know what numbers are Prime. After
  * knowing what numbers are prime, the rest is pretty straightforward.
  */
-public class PE0003 {
+public class PE0003 implements Problem {
     private static final long TARGET = 600851475143L;
-    public static void main(String[] args) {
+
+    @Override
+    public ProblemSolution solve() {
         PrimeGenerator primeGenerator = new PrimeGenerator();
 
         // Use the square root as the max value since any prime factor must be <= the square root.
@@ -25,9 +29,15 @@ public class PE0003 {
             long prime = primes.get(i);
             if (TARGET % prime == 0) {
                 System.out.println("Largest Prime Factor: " + prime);
-                return;
+                return ProblemSolution.builder()
+                        .solution(prime)
+                        .descriptiveSolution("Largest Prime Factor: " + prime)
+                        .build();
             }
         }
-        System.out.println("No Other Prime factors found. " + TARGET + " must be prime.");
+        return ProblemSolution.builder()
+                .solution(TARGET)
+                .descriptiveSolution("No Other Prime factors found. " + TARGET + " must be prime.")
+                .build();
     }
 }

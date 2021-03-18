@@ -1,6 +1,8 @@
 package problems;
 
 import lombok.SneakyThrows;
+import util.Problem;
+import util.ProblemSolution;
 import util.SlidingWindowProduct;
 
 import java.nio.file.Files;
@@ -16,10 +18,10 @@ import java.util.stream.LongStream;
  * This is similar to problem 8, but now we're dealing with a 2D array instead of a single numeric string. I'm thinking
  * we use the same strategy, but have it traverse the array in multiple ways.
  */
-public class PE0011 {
+public class PE0011 implements Problem {
     private static final String FILE_PATH = "src/main/java/resources/PE0011_grid";
 
-    public static void main(String[] args) {
+    public ProblemSolution solve() {
         long[][] grid = getNumberGrid();
         
         long bestRowProduct = getBestRowProduct(grid);
@@ -30,7 +32,11 @@ public class PE0011 {
         long bestVal = LongStream.of(bestRowProduct, bestColumnProduct, bestUpDiagonalProduct, bestDownDiagonalProduct)
                 .max()
                 .getAsLong();
-        System.out.println("Best Product: " + bestVal);
+
+        return ProblemSolution.builder()
+                .solution(bestVal)
+                .descriptiveSolution("Best Product: " + bestVal)
+                .build();
     }
 
     private static long getBestRowProduct(long[][] grid) {

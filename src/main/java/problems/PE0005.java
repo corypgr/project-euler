@@ -2,6 +2,8 @@ package problems;
 
 import prime.PrimeGenerator;
 import util.CountMap;
+import util.Problem;
+import util.ProblemSolution;
 
 import java.util.Map;
 import java.util.Set;
@@ -40,10 +42,11 @@ import java.util.Set;
  *
  * This works, but I didn't write any code :) I'll apply basically the same algorithm as code.
  */
-public class PE0005 {
+public class PE0005 implements Problem {
     private static final Long MAX_VAL = 20L;
 
-    public static void main(String[] args) {
+    @Override
+    public ProblemSolution solve() {
         PrimeGenerator primeGenerator = new PrimeGenerator();
         Set<Long> primes = primeGenerator.generatePrimesSet(MAX_VAL);
 
@@ -56,7 +59,11 @@ public class PE0005 {
         long product = minimalFactorSet.entrySet().stream()
                 .mapToLong(e -> (long) Math.pow(e.getKey(), e.getValue())) // shortcut for repeated multiplication
                 .reduce(1, (a, b) -> a * b);
-        System.out.println("Product: " + product);
+
+        return ProblemSolution.builder()
+                .solution(product)
+                .descriptiveSolution("Product: " + product)
+                .build();
     }
 
     private static CountMap<Long> getFactors(long val, Set<Long> primes) {

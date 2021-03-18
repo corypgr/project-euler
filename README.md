@@ -5,3 +5,14 @@ This repo is for my code solutions to the Project Euler problems. I've worked on
 My goal to to finish at least 1 problem each day. Project Euler gives a nice graphic to show how many problems you've solved. I've apparently already solved 80 problems, so I'll focus on those problems first so that my graphic eventually matches my progress here:
 
 ![Project Euler Progress](https://projecteuler.net/profile/corypgr.png)
+
+Build with:
+```
+mvn clean
+mvn package
+```
+
+Generates a jar at ./target/ProjectEuler-1.0-SNAPSHOT-jar-with-dependencies.jar which can be executed using:
+```
+java -jar ./target/ProjectEuler-1.0-SNAPSHOT-jar-with-dependencies.jar [--problemNumber <number>]
+```

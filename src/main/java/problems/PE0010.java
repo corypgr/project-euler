@@ -1,6 +1,8 @@
 package problems;
 
 import prime.PrimeGenerator;
+import util.Problem;
+import util.ProblemSolution;
 
 import java.util.List;
 
@@ -11,16 +13,20 @@ import java.util.List;
  *
  * With our PrimeGenerator this problem is pretty easy.
  */
-public class PE0010 {
+public class PE0010 implements Problem {
     private static final long MAX_PRIME = 2_000_000;
 
-    public static void main(String[] args) {
+    public ProblemSolution solve() {
         PrimeGenerator primeGenerator = new PrimeGenerator();
 
         List<Long> primes = primeGenerator.generatePrimesList(MAX_PRIME);
         long sum = primes.stream()
                 .mapToLong(Long::longValue)
                 .sum();
-        System.out.println("Prime Sum: " + sum);
+
+        return ProblemSolution.builder()
+                .solution(sum)
+                .descriptiveSolution("Prime Sum: " + sum)
+                .build();
     }
 }

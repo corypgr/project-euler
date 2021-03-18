@@ -1,6 +1,8 @@
 package problems;
 
 import lombok.SneakyThrows;
+import util.Problem;
+import util.ProblemSolution;
 import util.SlidingWindowProduct;
 
 import java.nio.file.Files;
@@ -17,14 +19,18 @@ import java.util.stream.Collectors;
  *
  * Modified to use the SlidingWindowProduct class.
  */
-public class PE0008 {
+public class PE0008 implements Problem {
     private static final String FILE_PATH = "src/main/java/resources/PE0008_number";
 
-    public static void main(String[] args) {
+    public ProblemSolution solve() {
         long[] array = getNumberArray();
         SlidingWindowProduct productUtil = new SlidingWindowProduct();
 
-        System.out.println("Greatest Product: " + productUtil.getBestProductSequence(array, 13));
+        long solution = productUtil.getBestProductSequence(array, 13);
+        return ProblemSolution.builder()
+                .solution(solution)
+                .descriptiveSolution("Greatest Product: " + solution)
+                .build();
     }
 
     @SneakyThrows

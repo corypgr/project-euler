@@ -1,6 +1,8 @@
 package problems;
 
 import lombok.Value;
+import util.Problem;
+import util.ProblemSolution;
 
 /**
  * Problem 9
@@ -10,13 +12,17 @@ import lombok.Value;
  * We can do a little math so that we're not checking too many values, but other than that this is a brute-force
  * strategy.
  */
-public class PE0009 {
+public class PE0009 implements Problem {
     private static final long GOAL = 1000L;
 
-    public static void main(String[] args) {
+    public ProblemSolution solve() {
         Triplet triplet = findTriplet();
-        System.out.println("Triplet: " + triplet);
-        System.out.println("Product: " + triplet.getA() * triplet.getB() * triplet.getC());
+
+        long product = triplet.getA() * triplet.getB() * triplet.getC();
+        return ProblemSolution.builder()
+                .solution(product)
+                .descriptiveSolution("Triplet: " + triplet + " Product: " + product)
+                .build();
     }
 
     private static Triplet findTriplet() {

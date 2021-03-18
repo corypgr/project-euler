@@ -1,5 +1,8 @@
 package problems;
 
+import util.Problem;
+import util.ProblemSolution;
+
 /**
  * Problem 2
  *
@@ -10,8 +13,10 @@ package problems;
  * think of an easy way to avoid the mod operation to detect even numbers,
  * though if there is a way then that would make a good optimization.
  */
-public class PE0002 {
-    public static void main(String[] args) {
+public class PE0002 implements Problem {
+
+    @Override
+    public ProblemSolution solve() {
         int previous = 1;
         int current = 2;
 
@@ -28,5 +33,9 @@ public class PE0002 {
         }
 
         System.out.println("Sum: " + sum);
+        return ProblemSolution.builder()
+                .solution(sum)
+                .descriptiveSolution("Sum: " + sum)
+                .build();
     }
 }
