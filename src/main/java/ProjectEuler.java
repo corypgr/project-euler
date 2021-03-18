@@ -11,6 +11,7 @@ import problems.PE0008;
 import problems.PE0009;
 import problems.PE0010;
 import problems.PE0011;
+import problems.PE0012;
 import util.Problem;
 import util.ProblemSolution;
 
@@ -28,7 +29,8 @@ public class ProjectEuler {
             Map.entry(8, new PE0008()),
             Map.entry(9, new PE0009()),
             Map.entry(10, new PE0010()),
-            Map.entry(11, new PE0011())
+            Map.entry(11, new PE0011()),
+            Map.entry(12, new PE0012())
     );
 
     public static void main(String[] args) {
