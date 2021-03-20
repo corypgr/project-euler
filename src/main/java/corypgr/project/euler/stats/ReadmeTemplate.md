@@ -10,10 +10,10 @@ Here are some direct stats (updated each time you run `mvn package`):
 
 |||
 |---|---|
-| Date Started Solving       | 2021-03-15   |
-| Problems Solved Goal       | 6   |
-| Problems Actually Solved   | 13 |
-| Due Date for next Solution | 2021-03-28  |
+| Date Started Solving       | <DateStartedSolving>   |
+| Problems Solved Goal       | <ProblemsSolvedGoal>   |
+| Problems Actually Solved   | <ProblemsSolvedActual> |
+| Due Date for next Solution | <NextSolutionDueDate>  |
 
 Build with:
 ```
