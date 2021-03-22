@@ -2,6 +2,7 @@ package corypgr.project.euler.problems;
 
 import corypgr.project.euler.problems.util.Problem;
 import corypgr.project.euler.problems.util.ProblemSolution;
+import corypgr.project.euler.problems.util.ProperDivisors;
 
 /**
  * Problem 12
@@ -36,9 +37,11 @@ import corypgr.project.euler.problems.util.ProblemSolution;
 public class PE0012 implements Problem {
     @Override
     public ProblemSolution solve() {
+        ProperDivisors divisorsUtil = new ProperDivisors();
+
         long curTriangleNumber = 3;
         long curTriangleNumberIndex = 2;
-        while (getNumDivisors(curTriangleNumber) <= 500) {
+        while (divisorsUtil.getNumDivisors(curTriangleNumber) <= 500) {
             curTriangleNumberIndex++;
             curTriangleNumber += curTriangleNumberIndex;
         }
@@ -47,23 +50,5 @@ public class PE0012 implements Problem {
                 .solution(curTriangleNumber)
                 .descriptiveSolution("Triangle Number with 500 or more divisors: " + curTriangleNumber)
                 .build();
-    }
-
-    private int getNumDivisors(long value) {
-        int numDivisors = 0;
-
-        // Don't need to check past sqrt(value). Can double count each divisor before that since we know there will be
-        // exactly 1 larger divisor (greater than sqrt(value)) and there won't be any other divisors after sqrt(value).
-        long maxDivisor = (long) Math.sqrt(value);
-        for (int i = 1; i <= maxDivisor; i++) {
-            if (value % i == 0) {
-                if (i == maxDivisor) {
-                    numDivisors++;
-                } else {
-                    numDivisors += 2;
-                }
-            }
-        }
-        return numDivisors;
     }
 }
