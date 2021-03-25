@@ -32,7 +32,6 @@ public class PE0002 implements Problem {
             current = next;
         }
 
-        System.out.println("Sum: " + sum);
         return ProblemSolution.builder()
                 .solution(sum)
                 .descriptiveSolution("Sum: " + sum)

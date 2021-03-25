@@ -28,7 +28,6 @@ public class PE0003 implements Problem {
         for (int i = primes.size() - 1; i >= 0; i--) {
             long prime = primes.get(i);
             if (TARGET % prime == 0) {
-                System.out.println("Largest Prime Factor: " + prime);
                 return ProblemSolution.builder()
                         .solution(prime)
                         .descriptiveSolution("Largest Prime Factor: " + prime)
