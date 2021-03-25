@@ -2,7 +2,7 @@ package corypgr.project.euler.problems;
 
 import corypgr.project.euler.problems.util.Problem;
 import corypgr.project.euler.problems.util.ProblemSolution;
-import corypgr.project.euler.problems.util.ProperDivisors;
+import corypgr.project.euler.problems.util.DivisorsUtil;
 
 /**
  * Problem 12
@@ -37,7 +37,7 @@ import corypgr.project.euler.problems.util.ProperDivisors;
 public class PE0012 implements Problem {
     @Override
     public ProblemSolution solve() {
-        ProperDivisors divisorsUtil = new ProperDivisors();
+        DivisorsUtil divisorsUtil = new DivisorsUtil();
 
         long curTriangleNumber = 3;
         long curTriangleNumberIndex = 2;

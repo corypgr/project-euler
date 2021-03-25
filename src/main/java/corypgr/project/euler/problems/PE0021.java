@@ -3,7 +3,7 @@ package corypgr.project.euler.problems;
 import corypgr.project.euler.problems.prime.PrimeGenerator;
 import corypgr.project.euler.problems.util.Problem;
 import corypgr.project.euler.problems.util.ProblemSolution;
-import corypgr.project.euler.problems.util.ProperDivisors;
+import corypgr.project.euler.problems.util.DivisorsUtil;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -26,7 +26,7 @@ public class PE0021 implements Problem {
         PrimeGenerator primeGenerator = new PrimeGenerator();
         Set<Long> primesUnderMax = primeGenerator.generatePrimesSet(MAX_NUM);
 
-        ProperDivisors divisorsUtil = new ProperDivisors();
+        DivisorsUtil divisorsUtil = new DivisorsUtil();
         Set<Long> amicableNumbers = new HashSet<>();
 
         for (long i = 1; i < MAX_NUM; i++) {
@@ -53,15 +53,13 @@ public class PE0021 implements Problem {
                 .build();
     }
 
-    private long getSumOfDivisors(long num, Set<Long> primes, ProperDivisors divisorUtil) {
+    private long getSumOfDivisors(long num, Set<Long> primes, DivisorsUtil divisorUtil) {
         if (primes.contains(num)) {
             return 1; // prime numbers only have 2 divisors. And we skip the number itself in this sum.
         }
 
-        Set<Long> divisors = divisorUtil.getDivisors(num);
-        return divisors.stream()
+        return divisorUtil.getProperDivisors(num).stream()
                 .mapToLong(Long::longValue)
-                .filter(v -> v != num) // Exclude the number itself
                 .sum();
     }
 }
