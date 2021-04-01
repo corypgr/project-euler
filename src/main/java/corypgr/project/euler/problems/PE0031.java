@@ -3,6 +3,7 @@ package corypgr.project.euler.problems;
 import corypgr.project.euler.problems.util.Problem;
 import corypgr.project.euler.problems.util.ProblemSolution;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
 
@@ -12,7 +13,7 @@ import java.util.stream.IntStream;
  * https://projecteuler.net/problem=31
  *
  * Looks a bit like a dynamic programming problem to me. We can work up from 1, determining all the ways there are to
- * make 1p, then 2p by referencing the 1p answer, and so on. I tried to do this, but it's a bit more compicated than
+ * make 1p, then 2p by referencing the 1p answer, and so on. I tried to do this, but it's a bit more complicated than
  * your average dynamic solution. If the ordering of the coins mattered, then the dynamic programming solution would
  * work just fine, but without it I was double counting certain combinations like (1p, 2p) and (2p, 1p). I wasn't able
  * to resolve this issue.
@@ -24,83 +25,62 @@ import java.util.stream.IntStream;
  * need to process all combinations. If a combination is > 200, you can skip over the rest of the incrementing for the
  * digit you're working on. We'll see if these optimizations gives us the speed we want here. This solution runs in about
  * 6 seconds, which is pretty slow...
+ *
+ * I came back to this and figured out the dynamic programming approach. The trick there is that when you subtract off a
+ * coin from the target 200 and look at the previously calculated number of combinations for the remaining amount, you
+ * only look at the combinations made by using the same coin or smaller coin values. Below I keep a Map for every coin
+ * value to the number of combinations for every amount. The new solution cleans things up really well and executes in
+ * less than 100 ms.
  */
 public class PE0031 implements Problem {
-    private static final int[] COINS = { 0, 1, 2, 5, 10, 20, 50, 100, 200};
-    private static final int[] COIN_VAL_TO_INDEX;
-    static {
-        COIN_VAL_TO_INDEX = new int[201];
-        COIN_VAL_TO_INDEX[0] = 0;
-        COIN_VAL_TO_INDEX[1] = 1;
-        COIN_VAL_TO_INDEX[2] = 2;
-        COIN_VAL_TO_INDEX[5] = 3;
-        COIN_VAL_TO_INDEX[10] = 4;
-        COIN_VAL_TO_INDEX[20] = 5;
-        COIN_VAL_TO_INDEX[50] = 6;
-        COIN_VAL_TO_INDEX[100] = 7;
-        COIN_VAL_TO_INDEX[200] = 8;
-    }
-    private static final int MAX_COIN_COUNT = 200;
+    private static final int[] COINS = { 1, 2, 5, 10, 20, 50, 100, 200};
     private static final int TARGET_AMOUNT = 200;
-    private static final int LAST_INDEX = 199;
+    private static final Map<Integer, Integer> ZERO_AMOUNT_MAP = Map.of(
+            1, 1,
+            2, 1,
+            5, 1,
+            10, 1,
+            20, 1,
+            50, 1,
+            100, 1,
+            200, 1);
 
     @Override
     public ProblemSolution solve() {
-        int[] currentIndices = new int[MAX_COIN_COUNT];
-        currentIndices[LAST_INDEX] = COINS.length - 1; // Seed with first valid state adding to 200 to simplify
-                                                               // initial computations.
+        // Top map key is the amount you're trying to find combinations for.
+        // Inner map key is the coin values to the number of combinations for that coin value.
+        // The 200 COIN key maps to the total combinations in all cases.
+        Map<Integer, Map<Integer, Integer>> amountToNumCombinationsByCoinType = new HashMap<>();
+        amountToNumCombinationsByCoinType.put(0, ZERO_AMOUNT_MAP);
 
-        int countOfTargetCombinations = 0;
-        while (currentIndices[0] == 0) { // When the first index flips to 1, that is the last valid combination.
-            countOfTargetCombinations++;
-            currentIndices = getNextTargetCombination(currentIndices);
+        for (int i = 1; i <= TARGET_AMOUNT; i++) {
+            Map<Integer, Integer> numCombinationsByCoinType = getNumCombinationsByCoinType(
+                    amountToNumCombinationsByCoinType, i);
+            amountToNumCombinationsByCoinType.put(i, numCombinationsByCoinType);
         }
-        countOfTargetCombinations++; // Account for last valid combination not being counted.
 
+        int solution = amountToNumCombinationsByCoinType.get(200).get(200);
         return ProblemSolution.builder()
-                .solution(countOfTargetCombinations)
-                .descriptiveSolution("Number of coin combinations to get to 200: " + countOfTargetCombinations)
+                .solution(solution)
+                .descriptiveSolution("Number of coin combinations to get to 200: " + solution)
                 .build();
     }
 
-    private int[] getNextTargetCombination(int[] indices) {
-        // Start by finding max index, backtrack to index before that (k), then set all indexes from k - n to k + 1.
-        int maxValIndex = indices[LAST_INDEX];
-        boolean flipComplete = false;
-        for (int i = LAST_INDEX - 1; i >= 0 && !flipComplete; i--) {
-            if (indices[i] < maxValIndex) {
-                int newValToFill = indices[i] + 1;
-                if (COINS[newValToFill] * (LAST_INDEX - i) <= TARGET_AMOUNT) {
-                    for (int j = i; j < indices.length; j++) {
-                        indices[j] = newValToFill;
-                    }
-                    flipComplete = true;
-                }
+    private Map<Integer, Integer> getNumCombinationsByCoinType(Map<Integer, Map<Integer, Integer>> amountToNumCombinationsByCoinType,
+                                                               int amount) {
+        int numWays = 0;
+        Map<Integer, Integer> coinToNumCombinations = new HashMap<>();
+        for (int coin : COINS) {
+            if (coin <= amount) {
+                int remaining = amount - coin;
+                numWays += amountToNumCombinationsByCoinType.get(remaining).get(coin);
             }
-        }
 
-        // Check validity of the resulting values.
-        int curAmount = IntStream.of(indices)
-                .map(i -> COINS[i])
-                .sum();
-        if (curAmount == TARGET_AMOUNT) {
-            return indices;
-        } else if (curAmount > TARGET_AMOUNT) {
-            // We went over the target. Repeat above to roll over to the next value again.
-            return getNextTargetCombination(indices);
+            // Still add the number of combinations for coins larger than amount. This gives us an easy lookup
+            // for small amounts when we're looking at larger coins.
+            coinToNumCombinations.put(coin, numWays);
         }
-
-        int lastIndexCoin = COINS[indices[LAST_INDEX]];
-        curAmount -= lastIndexCoin;
-        int nextCoinNeeded = TARGET_AMOUNT - curAmount;
-        if (COIN_VAL_TO_INDEX[nextCoinNeeded] > 0) {
-            indices[LAST_INDEX] = COIN_VAL_TO_INDEX[nextCoinNeeded];
-            return indices;
-        } else {
-            indices[LAST_INDEX]++;
-            return getNextTargetCombination(indices);
-        }
+        return coinToNumCombinations;
     }
-
 
 }
