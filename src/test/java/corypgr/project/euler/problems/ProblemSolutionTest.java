@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import corypgr.project.euler.problems.util.Problem;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -53,6 +52,7 @@ public class ProblemSolutionTest {
                 arguments(new PE0030(), 443839L),
                 arguments(new PE0031(), 73682),
                 arguments(new PE0032(), 45228),
+                arguments(new PE0033(), 100),
                 arguments(new PE0067(), 7273L));
     }
 }
