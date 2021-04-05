@@ -4,7 +4,6 @@ import corypgr.project.euler.problems.util.CombinationUtil;
 import corypgr.project.euler.problems.util.Problem;
 import corypgr.project.euler.problems.util.ProblemSolution;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -38,9 +37,27 @@ import java.util.stream.Collectors;
  * we can efficiently toss out some of the combinations. Namely, all combinations with only digits that are 3 or higher.
  * That should be (6 choose 6 with repeats) number of combinations = 462. 5005 - 462 = 4543 total combinations. A 1/10th
  * decrease in computation after we've determined all the combinations.
+ *
+ * An optimization I came up with in problem 34 applies here as well. Precalculated the 5th power values.
  */
 public class PE0030 implements Problem {
     private static final List<Integer> DIGITS = List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    private static final long[] NUM_TO_FIFTH_POWER;
+    private static final String[] ZERO_NUM_TO_PADDING;
+    static {
+        NUM_TO_FIFTH_POWER = new long[DIGITS.size()];
+        NUM_TO_FIFTH_POWER[0] = 0;
+        for (int i = 1; i < DIGITS.size(); i++) {
+            NUM_TO_FIFTH_POWER[i] = (long) Math.pow(i, 5);
+        }
+
+        ZERO_NUM_TO_PADDING = new String[DIGITS.size()];
+        ZERO_NUM_TO_PADDING[0] = "";
+        for (int i = 1; i < DIGITS.size(); i++) {
+            ZERO_NUM_TO_PADDING[i] = ZERO_NUM_TO_PADDING[i - 1] + "0";
+        }
+    }
+
     private static final Integer MAX_NUM_DIGITS = 6;
     private static final Integer MAX_FIRST_DIGIT = 2;
 
@@ -71,23 +88,19 @@ public class PE0030 implements Problem {
      */
     private Long getNumberIfIsSumOfFifthPowers(List<Integer> combination) {
         long sum = combination.stream()
-                .mapToLong(v -> (long) Math.pow(v, 5))
+                .mapToLong(v -> NUM_TO_FIFTH_POWER[v])
                 .sum();
 
-        List<Integer> sumAsSortedListOfInts = String.valueOf(sum)
+        String sumAsString = String.valueOf(sum);
+        // The sum we generate may not have as many digits as our combination. Pad with zeros in that case.
+        // We cannot remove the zeros from the combination since a zero may appear somewhere in the sum.
+        sumAsString = ZERO_NUM_TO_PADDING[combination.size() - sumAsString.length()] + sumAsString;
+
+        List<Integer> sumAsSortedListOfInts = sumAsString
                 .chars()
                 .mapToObj(Character::getNumericValue)
                 .sorted()
                 .collect(Collectors.toList());
-
-        // The sum we generate may not have as many digits as our combination. Pad with zeros in that case.
-        // We cannot remove the zeros from the combination since a zero may appear somewhere in the sum.
-        if (sumAsSortedListOfInts.size() < combination.size()) {
-            int numZerosToInsert = combination.size() - sumAsSortedListOfInts.size();
-            for (int i = 0; i < numZerosToInsert; i++) {
-                sumAsSortedListOfInts.add(0, 0);
-            }
-        }
 
         // combination is already sorted.
         return sumAsSortedListOfInts.equals(combination) ? sum : null;
