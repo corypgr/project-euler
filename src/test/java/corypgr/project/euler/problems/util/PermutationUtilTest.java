@@ -18,7 +18,7 @@ class PermutationUtilTest {
 
     @BeforeEach
     void setup() {
-        util = new PermutationUtil();
+        util = new PermutationUtil<>();
     }
 
     @Test
