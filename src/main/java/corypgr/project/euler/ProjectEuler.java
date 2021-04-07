@@ -49,6 +49,8 @@ import corypgr.project.euler.problems.PE0067;
 import corypgr.project.euler.problems.util.Problem;
 import corypgr.project.euler.problems.util.ProblemSolution;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Map;
 
 public class ProjectEuler {
@@ -120,8 +122,37 @@ public class ProjectEuler {
         System.out.println();
         System.out.println("Problem " + problemNumber + ":");
 
-        ProblemSolution solution = numberToProblem.get(problemNumber).solve();
+        Problem problem = numberToProblem.get(problemNumber);
+        Instant startTime = Instant.now();
+        ProblemSolution solution = problem.solve();
+        Instant endTime = Instant.now();
+
         System.out.println("Solution: " + solution.getSolution());
         System.out.println("Descriptive Solution: " + solution.getDescriptiveSolution());
+        System.out.println("Execution time: " + getExecutionTime(startTime, endTime));
+    }
+
+    /**
+     * Calculate execution time printed wtih seconds and either milliseconds or nanoseconds. Seconds are only displayed
+     * if the execution lasted longer than 1 second. When seconds are displayed, they are always accompanied by the
+     * milliseconds part.
+     *
+     * If the execution is less than 1 second and longer than 1 millisecond, then milliseconds are displayed. Otherwise,
+     * nanoseconds are displayed.
+     */
+    private static String getExecutionTime(Instant start, Instant end) {
+        Duration duration = Duration.between(start, end);
+
+        // All seconds, not just the ones less than 1 minute.
+        long seconds = duration.getSeconds();
+        if (seconds > 0) {
+            return seconds + "s " + duration.toMillisPart() + "ms";
+        }
+
+        long millis = duration.toMillisPart();
+        if (millis > 0) {
+            return millis + "ms";
+        }
+        return duration.toNanosPart() + "ns";
     }
 }
