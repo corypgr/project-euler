@@ -1,7 +1,9 @@
 package corypgr.project.euler.problems.util;
 
-import java.util.Collections;
+import corypgr.project.euler.problems.prime.PrimeGenerator;
+
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -29,6 +31,34 @@ public class DivisorsUtil {
             if (value % i == 0) {
                 divisors.add(i);
                 divisors.add(value / i); // might be the same as i. Set will dedupe for us.
+            }
+        }
+        return divisors;
+    }
+
+    public Set<Long> getProperPrimeDivisors(long value) {
+        PrimeGenerator primeGenerator = new PrimeGenerator();
+        List<Long> primes = primeGenerator.generatePrimesList((long) Math.sqrt(value));
+        return getProperPrimeDivisors(value, primes);
+    }
+
+    /**
+     * Can pass in the primes that you want to check against. Can be useful if you're getting the prime divisors for
+     * many numbers.
+     */
+    public Set<Long> getProperPrimeDivisors(long value, List<Long> primes) {
+        Set<Long> divisors = new HashSet<>();
+        long remaining = value;
+
+        // Only need to check up to the sqrt(val), since there wouldn't be any more divisors after that.
+        // Initial setting. Can change when we find divisors.
+        long maxLoop = (long) Math.sqrt(value);
+        for (int i = 0; i < primes.size() && primes.get(i) <= maxLoop; i++) {
+            long prime = primes.get(i);
+            while (remaining % prime == 0) {
+                remaining /= prime;
+                maxLoop = remaining; // After dividing, remaining might be a prime number, making it a proper divisor too.
+                divisors.add(prime);
             }
         }
         return divisors;
