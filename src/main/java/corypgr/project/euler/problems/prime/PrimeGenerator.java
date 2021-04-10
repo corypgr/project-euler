@@ -33,6 +33,7 @@ public class PrimeGenerator {
 
     private LinkedHashSetWithModifiableIteration<Long> generatePrimes(long maxVal) {
         LinkedHashSetWithModifiableIteration<Long> primes = new LinkedHashSetWithModifiableIteration<>();
+        long maxPrimeToMultiply = (long) Math.sqrt(maxVal);
 
         // Add all numbers up to the maxVal starting with 2, the first (and best) prime number.
         for (long i = 2; i <= maxVal; i++) {
@@ -44,6 +45,10 @@ public class PrimeGenerator {
         // example, even though 4 was added above, we won't process 4 at this level because
         // it will be removed.
         for (Long prime : primes) {
+            // Don't need to go beyond the sqrt of the maxVal. All products after this will be larger than maxVal
+            if (prime > maxPrimeToMultiply) {
+                return primes;
+            }
 
             // The innerIterator here is determining what values to multiply our prime
             // against to produce the products we remove.

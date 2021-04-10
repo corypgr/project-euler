@@ -11,7 +11,7 @@ Here are some direct stats (updated each time you run `mvn package`):
 |||
 |---|---|
 | Date Started Solving       | 2021-03-15   |
-| Problems Solved Goal       | 26   |
+| Problems Solved Goal       | 27   |
 | Problems Actually Solved   | 52 |
 | Due Date for next Solution | 2021-05-06  |
 
