@@ -1,5 +1,6 @@
 package corypgr.project.euler.problems.util;
 
+import lombok.EqualsAndHashCode;
 import lombok.experimental.Delegate;
 
 import java.util.HashMap;
@@ -8,6 +9,7 @@ import java.util.Map;
 /**
  * Utility for tracking the number of occurrences of something.
  */
+@EqualsAndHashCode
 public class CountMap<T> implements Map<T, Integer> {
     @Delegate
     private final Map<T, Integer> map;
