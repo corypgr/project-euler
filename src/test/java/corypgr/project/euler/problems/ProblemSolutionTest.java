@@ -78,6 +78,7 @@ public class ProblemSolutionTest {
                 arguments(new PE0056(), 972),
                 arguments(new PE0057(), 153),
                 arguments(new PE0058(), 26241),
+                arguments(new PE0059(), 129448),
                 arguments(new PE0067(), 7273L));
     }
 }
