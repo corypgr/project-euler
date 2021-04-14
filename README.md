@@ -2,7 +2,7 @@ I've been thinking about revisiting [Project Euler](https://projecteuler.net) fo
 
 This repo is for my code solutions to the Project Euler problems. I've worked on this at least twice before, and either can't find the code from then (read: didn't try to find) or the other attempts were shared with someone. This time I thought I would start fresh.
 
-My goal is to finish at least 1 problem each day. Project Euler gives a nice graphic to show how many problems you've solved. I've apparently already solved 80 problems, so I'll focus on those problems first so that my graphic eventually matches my progress here:
+My goal is to finish at least 1 problem each day. Project Euler gives a nice graphic to show how many problems you've solved. I've apparently already solved 80 problems. I'll try to focus on those problems first so that my graphic eventually matches my progress here, but it looks like I jumped around a lot:
 
 ![Project Euler Progress](https://projecteuler.net/profile/corypgr.png)
 
@@ -11,9 +11,9 @@ Here are some direct stats (updated each time you run `mvn package`):
 |||
 |---|---|
 | Date Started Solving       | 2021-03-15   |
-| Problems Solved Goal       | 30   |
-| Problems Actually Solved   | 60 |
-| Due Date for next Solution | 2021-05-14  |
+| Problems Solved Goal       | 31   |
+| Problems Actually Solved   | 61 |
+| Due Date for next Solution | 2021-05-15  |
 
 Build with:
 ```
