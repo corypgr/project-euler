@@ -4,8 +4,6 @@ import corypgr.project.euler.problems.util.Problem;
 import corypgr.project.euler.problems.util.ProblemSolution;
 
 import java.math.BigInteger;
-import java.util.function.IntPredicate;
-import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
