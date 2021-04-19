@@ -1,13 +1,9 @@
 package corypgr.project.euler.problems;
 
+import corypgr.project.euler.problems.util.ContinuedFractionUtil;
 import corypgr.project.euler.problems.util.Problem;
 import corypgr.project.euler.problems.util.ProblemSolution;
-import lombok.AllArgsConstructor;
-import lombok.Value;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.stream.IntStream;
 
 /**
@@ -40,108 +36,22 @@ import java.util.stream.IntStream;
  * our fractions take, it isn't that hard. I rolled my own solution specifically for this scenario. We subtract the int
  * val from the fraction and then take the reciprocol, only doing our "real" math when we need to pull the int val. This
  * works, and runs very quickly as well.
+ *
+ * ------
+ * Refactored the continued fraction functionality into ContinuedFractionUtil after working on Problem 66.
  */
 public class PE0064 implements Problem {
     @Override
     public ProblemSolution solve() {
+        ContinuedFractionUtil continuedFractionUtil = new ContinuedFractionUtil();
         long count = IntStream.rangeClosed(1, 10000)
-                .mapToObj(this::getSquareRootAsContinuedFraction)
-                .filter(v -> v.getContinuedPart().size() % 2 == 1)
+                .mapToObj(continuedFractionUtil::getContinuedFractionOfSquareRoot)
+                .filter(v -> v.getRepeatedContinuedPart().size() % 2 == 1)
                 .count();
 
         return ProblemSolution.builder()
                 .solution(count)
                 .descriptiveSolution("Number of square roots with odd continued parts: " + count)
                 .build();
-    }
-
-    private ContinuedFraction getSquareRootAsContinuedFraction(int n) {
-        CustomFraction fraction = new CustomFraction(n);
-        int wholePart = fraction.getIntValue();
-        if (wholePart * wholePart == n) {
-            // Not irrational
-            return new ContinuedFraction(wholePart, Collections.emptyList());
-        }
-
-        List<Integer> continuedList = new ArrayList<>();
-        int intVal = wholePart;
-        int maxIntVal = wholePart * 2;
-        while (intVal != maxIntVal) {
-            // At each step the next fraction in the continued fraction is calculated by first subtracting the last
-            // intVal and then taking the reciprocal.
-            fraction = fraction.subtract(intVal).reciprocal();
-
-            intVal = fraction.getIntValue();
-            continuedList.add(intVal);
-        }
-        return new ContinuedFraction(wholePart, continuedList);
-    }
-
-    @Value
-    private static class ContinuedFraction {
-        private final int wholePart;
-        private final List<Integer> continuedPart;
-    }
-
-    /**
-     * A CustomFraction when computed is (sqrt(numeratorSquareRoot) + numeratorAddNum) / denominatorNum;
-     */
-    @Value
-    @AllArgsConstructor
-    private static class CustomFraction {
-        private final long numeratorSquareRoot;
-        private final long numeratorAddNum;
-        private final long denominatorNum;
-
-        /**
-         * Sort of our base. We start with just the square root number. The other numbers are filled in so our
-         * computation = sqrt(numeratorSquareRoot).
-         */
-        public CustomFraction(long numeratorSquareRoot) {
-            this.numeratorSquareRoot = numeratorSquareRoot;
-            this.numeratorAddNum = 0;
-            this.denominatorNum = 1;
-        }
-
-        /**
-         * Subtracting in our CustomFraction is just subtracting the (denominator * val) from the numerator.
-         */
-        public CustomFraction subtract(long val) {
-            long newNumeratorAddNum = getNumeratorAddNum() - (denominatorNum * val);
-            return new CustomFraction(getNumeratorSquareRoot(), newNumeratorAddNum, getDenominatorNum());
-        }
-
-        /**
-         * Returns 1 / (existing fraction) where the square root stays in the numerator in order to keep the equation
-         * simple. Normally, the reciprocal is just swapping the numerator and denominator. To put the square root back
-         * in the numerator, we multiply the numerator and denominator by the conjugate of the denominator.
-         *
-         * For the denominator the square root irrational is eliminated, and we're left with
-         * sqrt(numeratorSquareRoot)^2 - numeratorAddNum^2 (we always subtract since we multiplied a positive and a
-         * negative).
-         *
-         * The numerator is just denominatorNum * (sqrt(numeratorSquareRoot) - numeratorAddNum). There's an interesting
-         * pattern here though. The value in the new denominator is always divisible by the old denominatorNum (the new
-         * multiplier in the numerator). This means we can divide out the old denominatar from the new ond and ignore
-         * the multiplier in the numerator.
-         */
-        public CustomFraction reciprocal() {
-            long newDenominatorNum = (getNumeratorSquareRoot() - (getNumeratorAddNum() * getNumeratorAddNum()))
-                    / getDenominatorNum();
-
-            // Square root val stays the same. We just flip the sign of our addNum.
-            long newNumeratorAddNum = -1 * getNumeratorAddNum();
-            return new CustomFraction(getNumeratorSquareRoot(), newNumeratorAddNum, newDenominatorNum);
-        }
-
-        /**
-         * Returns the integer portion of the computed fraction.
-         *
-         * This actually calculates the fraction value, using only 3 calculations so there is unlikely to be too many
-         * double rounding issues.
-         */
-        public int getIntValue() {
-            return (int) ((Math.sqrt(getNumeratorSquareRoot()) + getNumeratorAddNum()) / getDenominatorNum());
-        }
     }
 }

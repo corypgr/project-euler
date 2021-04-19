@@ -1,9 +1,14 @@
 package corypgr.project.euler.problems;
 
+import corypgr.project.euler.problems.util.ContinuedFractionUtil;
+import corypgr.project.euler.problems.util.ContinuedFractionUtil.RationalFraction;
 import corypgr.project.euler.problems.util.Problem;
 import corypgr.project.euler.problems.util.ProblemSolution;
 
 import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.stream.Stream;
 
 /**
  * Problem 65
@@ -34,13 +39,18 @@ import java.math.BigInteger;
  * for c(n) = the value in the continued fraction, f(n) = c(n) * f(n - 1) + f(n - 2).
  *
  * We can calculate all of the numerators using this up to the 100th convergent.
+ *
+ * -------
+ * Refactored this a bit after working on Problem 66. We now generate the full convergents (numerator and denominator)
+ * and pull out the numerator value for the solution.
  */
 public class PE0065 implements Problem {
-    private static final int CONVERGENT_NUMBER_POSITION = 99; // 0 index
+    private static final int CONVERGENT_NUMBER_POSITION = 100;
+
     @Override
     public ProblemSolution solve() {
-        BigInteger[] convergentNumerators = getConvergentNumerators();
-        int sum = getSumOfDigits(convergentNumerators[CONVERGENT_NUMBER_POSITION]);
+        RationalFraction convergentFraction = getTargetConvergentFraction();
+        int sum = getSumOfDigits(convergentFraction.getNumerator());
 
         return ProblemSolution.builder()
                 .solution(sum)
@@ -48,36 +58,30 @@ public class PE0065 implements Problem {
                 .build();
     }
 
-    private BigInteger[] getConvergentNumerators() {
-        int[] continuedFraction = getContinuedFraction();
+    private RationalFraction getTargetConvergentFraction() {
+        ContinuedFractionUtil continuedFractionUtil = new ContinuedFractionUtil();
+        Iterator<RationalFraction> convergentIterator =
+                continuedFractionUtil.getConvergentsUsingContinuedFractionVals(2, getContinuedFractionIterator());
 
-        // Add 1 so we can access the position.
-        BigInteger[] convergentNumerators = new BigInteger[CONVERGENT_NUMBER_POSITION + 1];
-        convergentNumerators[0] = BigInteger.TWO;
-        convergentNumerators[1] = BigInteger.valueOf(3);
-        for (int i = 2; i < convergentNumerators.length; i++) {
-            BigInteger iMinus1Val = convergentNumerators[i - 1].multiply(BigInteger.valueOf(continuedFraction[i]));
-            BigInteger iMinus2Val = convergentNumerators[i - 2];
-            convergentNumerators[i] = iMinus1Val.add(iMinus2Val);
-        }
-        return convergentNumerators;
+        // Uses an infinite stream while the iterator isn't infinite. Since we know when the iterator ends, this is ok.
+        return Stream.generate(convergentIterator::next)
+                .skip(CONVERGENT_NUMBER_POSITION - 1)
+                .findFirst()
+                .get();
     }
 
-    private int[] getContinuedFraction() {
-        // Add 1 so we can access the position.
-        int[] continuedFraction = new int[CONVERGENT_NUMBER_POSITION + 1];
-        // Shifting this by 1 so it matches the indices for convergentNumbers.
-        continuedFraction[1] = 1;
+    private Iterator<Integer> getContinuedFractionIterator() {
+        int[] continuedFraction = new int[CONVERGENT_NUMBER_POSITION];
 
         // Start by filling with all 1s. We'll replace every third element next.
-        for (int i = 2; i < continuedFraction.length; i++) {
+        for (int i = 0; i < continuedFraction.length; i++) {
             continuedFraction[i] = 1;
         }
 
-        for (int i = 2, num = 2; i < continuedFraction.length; i += 3, num += 2) {
+        for (int i = 1, num = 2; i < continuedFraction.length; i += 3, num += 2) {
             continuedFraction[i] = num;
         }
-        return continuedFraction;
+        return Arrays.stream(continuedFraction).iterator();
     }
 
     private int getSumOfDigits(BigInteger num) {
