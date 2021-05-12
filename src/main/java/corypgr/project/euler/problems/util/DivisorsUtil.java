@@ -17,7 +17,9 @@ public class DivisorsUtil {
     }
 
     public Set<Long> getProperDivisors(long value) {
-        if (value <= 1) {
+        if (value < 1) {
+            throw new IllegalArgumentException("value must be greater than zero.");
+        } else if (value == 1) {
             return new HashSet<>();
         }
 
@@ -36,6 +38,12 @@ public class DivisorsUtil {
         return divisors;
     }
 
+    public Set<Long> getPrimeDivisors(long value) {
+        PrimeGenerator primeGenerator = new PrimeGenerator();
+        List<Long> primes = primeGenerator.generatePrimesList((long) Math.sqrt(value));
+        return getPrimeDivisors(value, primes);
+    }
+
     public Set<Long> getProperPrimeDivisors(long value) {
         PrimeGenerator primeGenerator = new PrimeGenerator();
         List<Long> primes = primeGenerator.generatePrimesList((long) Math.sqrt(value));
@@ -46,7 +54,25 @@ public class DivisorsUtil {
      * Can pass in the primes that you want to check against. Can be useful if you're getting the prime divisors for
      * many numbers.
      */
+    public Set<Long> getPrimeDivisors(long value, List<Long> primes) {
+        Set<Long> divisors = getProperPrimeDivisors(value, primes);
+
+        // If divisors is empty, the passed value must be prime.
+        if (divisors.isEmpty() && value > 1) {
+            divisors.add(value);
+        }
+        return divisors;
+    }
+
+    /**
+     * Can pass in the primes that you want to check against. Can be useful if you're getting the prime divisors for
+     * many numbers.
+     */
     public Set<Long> getProperPrimeDivisors(long value, List<Long> primes) {
+        if (value < 1) {
+            throw new IllegalArgumentException("value must be greater than zero.");
+        }
+
         Set<Long> divisors = new HashSet<>();
         long remaining = value;
 
@@ -57,28 +83,40 @@ public class DivisorsUtil {
             long prime = primes.get(i);
             while (remaining % prime == 0) {
                 remaining /= prime;
-                maxLoop = remaining; // After dividing, remaining might be a prime number, making it a proper divisor too.
+                maxLoop = Math.min(remaining, maxLoop); // After dividing, remaining might be a prime number, making it a proper divisor too.
                 divisors.add(prime);
             }
         }
+
+        if (remaining != value && remaining > 1) {
+            divisors.add(remaining);
+        }
+
         return divisors;
     }
 
     public long getNumDivisors(long value) {
+        if (value < 1) {
+            throw new IllegalArgumentException("value must be greater than zero.");
+        }
+
         long numDivisors = 0;
 
         // Don't need to check past sqrt(value). Can double count each divisor before that since we know there will be
         // exactly 1 larger divisor (greater than sqrt(value)) and there won't be any other divisors after sqrt(value).
         long maxDivisor = (long) Math.sqrt(value);
-        for (int i = 1; i <= maxDivisor; i++) {
+        for (int i = 1; i < maxDivisor; i++) {
             if (value % i == 0) {
-                if (i == maxDivisor) {
-                    numDivisors++;
-                } else {
-                    numDivisors += 2;
-                }
+                numDivisors += 2;
             }
         }
+
+        // Checks if value is divisible by maxDivisor. If maxDivisor is exactly the square root of value, then add
+        // just 1. The "pair" here would be the same maxDivisor value.
+        if (value % maxDivisor == 0) {
+            numDivisors += maxDivisor * maxDivisor == value ? 1 : 2;
+        }
+
         return numDivisors;
     }
 }

@@ -29,6 +29,12 @@ import java.util.Set;
  * an unanswered question here though. If two n's had the same prime divisor sets, would a larger n be better? That isn't
  * clear since the phi(n) result will change roughly proportional to the size of n. Luckily, we didn't need to worry
  * about that here.
+ *
+ * -----
+ * After seeing Problem 70 I did a little research on efficiently computing the Totient function. It can be computed
+ * using n * (the product of all prime divisors in the formula (1 - 1/p)). See https://en.wikipedia.org/wiki/Euler%27s_totient_function
+ * Given this formula, we can see n/phi(n) == m/phi(m) when n and m have the same prime divisors. So, size of n doesn't
+ * actually matter.
  */
 public class PE0069 implements Problem {
     private static final int MAX_N = 1_000_000;
@@ -73,8 +79,7 @@ public class PE0069 implements Problem {
             }
         }
 
-        // Divisors are equal. Return false.
-        // Unclear whether a higher or lower n would yield a better phi function. Revisit if needed.
+        // Divisors are equal. n/phi(n) is equal between the two.
         return false;
     }
 }
