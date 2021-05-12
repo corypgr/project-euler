@@ -4,9 +4,9 @@ import corypgr.project.euler.problems.prime.PrimeGenerator;
 import corypgr.project.euler.problems.util.DivisorsUtil;
 import corypgr.project.euler.problems.util.Problem;
 import corypgr.project.euler.problems.util.ProblemSolution;
+import corypgr.project.euler.problems.util.TotientFunctionUtil;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -25,6 +25,10 @@ import java.util.Set;
  *
  * We can determine the divisors of our d value, and use previous calculations to determine the number of new
  * combinations to add for d.
+ *
+ * Above worked, but is slow. Takes around 8-9 seconds to run. Reading the Euler forum thread for this, I realize that
+ * we're seeing the same thing as Euler's Totient function again. q(d) = phi(d) because it is looking for the relatively
+ * prime values of d. With this, I can optimize the solution significantly.
  */
 public class PE0072 implements Problem {
     private static final int MAX_D = 1_000_000;
@@ -32,30 +36,17 @@ public class PE0072 implements Problem {
     @Override
     public ProblemSolution solve() {
         PrimeGenerator primeGenerator = new PrimeGenerator();
-        Set<Long> primes = primeGenerator.generatePrimesSet(MAX_D);
+        List<Long> primes = primeGenerator.generatePrimesList((long) Math.sqrt(MAX_D));
 
         DivisorsUtil divisorsUtil = new DivisorsUtil();
+        TotientFunctionUtil totientFunctionUtil = new TotientFunctionUtil();
 
-        Map<Long, Long> dToNewUniqueVals = new HashMap<>();
-        dToNewUniqueVals.put(1L, 0L); // 1 is present in all divisor sets.
-
+        long uniqueCount = 0;
         for (long d = 2; d <= MAX_D; d++) {
-            //System.out.println(d);
-            if (primes.contains(d)) {
-                dToNewUniqueVals.put(d, d - 1);
-            } else {
-                Set<Long> divisors = divisorsUtil.getProperDivisors(d);
-                long newUnique = d - 1;
-                for (long divisor : divisors) {
-                    newUnique -= dToNewUniqueVals.get(divisor);
-                }
-                dToNewUniqueVals.put(d, newUnique);
-            }
+            Set<Long> primeDivisors = divisorsUtil.getPrimeDivisors(d, primes);
+            uniqueCount += totientFunctionUtil.calculateTotientFunction(d, primeDivisors);
         }
 
-        long uniqueCount = dToNewUniqueVals.values().stream()
-                .mapToLong(Long::longValue)
-                .sum();
         return ProblemSolution.builder()
                 .solution(uniqueCount)
                 .descriptiveSolution("Number of reduced proper fractions for d <= 1,000,000: " + uniqueCount)
