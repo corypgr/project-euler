@@ -7,7 +7,6 @@ import corypgr.project.euler.problems.util.ProblemSolution;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * Problem 34
