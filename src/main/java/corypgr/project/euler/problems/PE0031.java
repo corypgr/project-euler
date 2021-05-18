@@ -3,9 +3,11 @@ package corypgr.project.euler.problems;
 import corypgr.project.euler.problems.util.Problem;
 import corypgr.project.euler.problems.util.ProblemSolution;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.IntStream;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Problem 31
@@ -35,15 +37,9 @@ import java.util.stream.IntStream;
 public class PE0031 implements Problem {
     private static final int[] COINS = { 1, 2, 5, 10, 20, 50, 100, 200};
     private static final int TARGET_AMOUNT = 200;
-    private static final Map<Integer, Integer> ZERO_AMOUNT_MAP = Map.of(
-            1, 1,
-            2, 1,
-            5, 1,
-            10, 1,
-            20, 1,
-            50, 1,
-            100, 1,
-            200, 1);
+    private static final Map<Integer, Integer> ZERO_AMOUNT_MAP = Arrays.stream(COINS)
+            .boxed()
+            .collect(Collectors.toMap(Function.identity(), v -> 1));
 
     @Override
     public ProblemSolution solve() {
@@ -59,7 +55,7 @@ public class PE0031 implements Problem {
             amountToNumCombinationsByCoinType.put(i, numCombinationsByCoinType);
         }
 
-        int solution = amountToNumCombinationsByCoinType.get(200).get(200);
+        int solution = amountToNumCombinationsByCoinType.get(TARGET_AMOUNT).get(200);
         return ProblemSolution.builder()
                 .solution(solution)
                 .descriptiveSolution("Number of coin combinations to get to 200: " + solution)
