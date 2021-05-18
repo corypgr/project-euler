@@ -54,8 +54,9 @@ public class PE0075 implements Problem {
         CountMap<Long> perimeterCountMap = new CountMap<>();
         for (long m = 1; m <= MAX_M; m++) {
             long mSquared = m * m;
+            long maxN = getMaxN(m, mSquared);
             // One of m or n must be even for the perimeter to be primitive.
-            for (long n = m % 2 == 0 ? 1 : 2; n < m; n += 2) {
+            for (long n = m % 2 == 0 ? 1 : 2; n <= maxN; n += 2) {
                 if (areCoprime(valToPrimeDivisors.get(m), valToPrimeDivisors.get(n))) {
                     List<Long> perimeters = getAllPerimetersForMAndN(m, n, mSquared);
                     perimeters.forEach(perimeterCountMap::addCount);
@@ -86,6 +87,17 @@ public class PE0075 implements Problem {
         return divisorsUtil.getPrimeDivisors(d, primes).stream()
                 .sorted()
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Solve for n:
+     * MAX_PERIMETER = 2*m^2 + 2*m*n
+     *
+     * Then choose smaller of n and m.
+     */
+    private long getMaxN(long m, long mSquared) {
+        long maxNFromEquation = ((MAX_PERIMETER / 2) - mSquared) / m;
+        return Math.min(m - 1, maxNFromEquation);
     }
 
     /**
