@@ -2,17 +2,11 @@ package corypgr.project.euler.problems;
 
 import corypgr.project.euler.problems.util.Problem;
 import corypgr.project.euler.problems.util.ProblemSolution;
-import lombok.Data;
 import lombok.SneakyThrows;
-import lombok.Value;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Set;
 
 /**
  * Problem 81
@@ -27,115 +21,55 @@ import java.util.Set;
  *  * Add updated wrapped values to the queue if they aren't already there.
  *
  * We process the queue until it is empty, and use the minimal sum from the last value in the grid.
+ * ----------------
+ * After I walked away from this I started to think that my other solution, while it worked, was probably more complex
+ * than it needed to be. We can do the same basic strategy by overriding the grid values directly to be
+ * grid[row][col] + min(grid[row - 1][col], grid[row][col - 1]). Also, instead of using a queue we can just traverse
+ * the grid in the normal order (all of row 1, all of row 2, etc..), since that order ensures the desired values for
+ * the cell above and to the left of the current cell is always set.
  */
 public class PE0081 implements Problem {
     private static final String FILE_PATH = "src/main/java/corypgr/project/euler/problems/resources/PE0081_grid";
 
     @Override
     public ProblemSolution solve() {
-        Cell[][] grid = getGrid();
-        Queue<GridCoordinates> queue = new LinkedList<>();
-        Set<GridCoordinates> coordsAddedToQueue = new HashSet<>();
+        int[][] grid = getGrid();
 
-        GridCoordinates initialCoordinates = new GridCoordinates(0, 0);
-        queue.add(initialCoordinates);
-        coordsAddedToQueue.add(initialCoordinates);
-        while (!queue.isEmpty()) {
-            GridCoordinates coords = queue.remove();
-            Cell cell = getCellFromGrid(coords, grid);
+        // Some special processing for the first row and col to avoid handling out of bounds edge cases.
+        // The first cell (grid[0][0]) doesn't change. It just seeds the rest of the cells.
+        // The minimal path sum for the first row and col is just the cell + the cell behind it.
+        for (int col = 1; col < grid[0].length; col++) {
+            grid[0][col] += grid[0][col - 1];
+        }
+        for (int row = 1; row < grid.length; row++) {
+            grid[row][0] += grid[row - 1][0];
+        }
 
-            GridCoordinates rightCoords = coords.getCoordsForRightCell();
-            Cell rightCell = getCellFromGrid(rightCoords, grid);
-            if (rightCell != null) {
-                rightCell.setMinimalSumFromLeft(cell.getMinimalSum());
-                if (!coordsAddedToQueue.contains(rightCoords)) {
-                    queue.add(rightCoords);
-                    coordsAddedToQueue.add(rightCoords);
-                }
-            }
-
-            GridCoordinates downCoords = coords.getCoordsForDownCell();
-            Cell downCell = getCellFromGrid(downCoords, grid);
-            if (downCell != null) {
-                downCell.setMinimalSumFromUp(cell.getMinimalSum());
-                if (!coordsAddedToQueue.contains(downCoords)) {
-                    queue.add(downCoords);
-                    coordsAddedToQueue.add(downCoords);
-                }
+        // Process remaining rows and columns.
+        for (int row = 1; row < grid.length; row++) {
+            for (int col = 1; col < grid[row].length; col++) {
+                grid[row][col] += Math.min(grid[row - 1][col], grid[row][col - 1]);
             }
         }
 
-        Cell lastCell = grid[grid.length - 1][grid[0].length - 1];
-
+        int solution = grid[grid.length - 1][grid[0].length - 1];
         return ProblemSolution.builder()
-                .solution(lastCell.getMinimalSum())
-                .descriptiveSolution("Minimal Path sum: " + lastCell.getMinimalSum())
+                .solution(solution)
+                .descriptiveSolution("Minimal Path Sum: " + solution)
                 .build();
     }
 
-    private Cell getCellFromGrid(GridCoordinates coords, Cell[][] grid) {
-        if (coords.getRow() >= grid.length || coords.getCol() >= grid[0].length) {
-            return null;
-        }
-
-        return grid[coords.getRow()][coords.getCol()];
-    }
-
     @SneakyThrows
-    private Cell[][] getGrid() {
+    private int[][] getGrid() {
         return Files.lines(Paths.get(FILE_PATH))
                 .map(line -> line.split(","))
-                .map(this::stringsToCells)
-                .toArray(Cell[][]::new);
+                .map(this::stringsToInts)
+                .toArray(int[][]::new);
     }
 
-    private Cell[] stringsToCells(String[] strings) {
+    private int[] stringsToInts(String[] strings) {
         return Arrays.stream(strings)
-                .map(Integer::parseInt)
-                .map(Cell::new)
-                .toArray(Cell[]::new);
-    }
-
-    @Value
-    private static class GridCoordinates {
-        private final int row;
-        private final int col;
-
-        public GridCoordinates getCoordsForRightCell() {
-            return new GridCoordinates(row, col + 1);
-        }
-
-        public GridCoordinates getCoordsForDownCell() {
-            return new GridCoordinates(row + 1, col);
-        }
-    }
-
-    @Data
-    private static class Cell {
-        private final int val;
-        private int minimalSumFromUp;
-        private int minimalSumFromLeft;
-        private int minimalSum;
-
-        public Cell(int val) {
-            this.val = val;
-            this.minimalSumFromUp = -1;
-            this.minimalSumFromLeft = -1;
-            this.minimalSum = val; // Will update when other minimalSum values come in.
-        }
-
-        public void setMinimalSumFromUp(int sum) {
-            this.minimalSumFromUp = sum;
-            if (this.minimalSumFromUp < this.minimalSumFromLeft || this.minimalSumFromLeft == -1) {
-                this.minimalSum = this.minimalSumFromUp + this.val;
-            }
-        }
-
-        public void setMinimalSumFromLeft(int sum) {
-            this.minimalSumFromLeft = sum;
-            if (this.minimalSumFromLeft < this.minimalSumFromUp || this.minimalSumFromUp == -1) {
-                this.minimalSum = this.minimalSumFromLeft + this.val;
-            }
-        }
+                .mapToInt(Integer::parseInt)
+                .toArray();
     }
 }
