@@ -74,6 +74,7 @@ public class PE0079 implements Problem {
             valToNode.put(hint.getC(), c);
 
             a.addChild(b);
+            a.addChild(c);
             b.addChild(c);
         }
         return new HashSet<>(valToNode.values());
