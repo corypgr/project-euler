@@ -18,6 +18,9 @@ import java.util.stream.IntStream;
  * I think we can apply the same ideas here for a dynamic programming solution. The main difference is that we need at
  * least 2 positive numbers for each combination. That excludes using v == 100 all by itself, so we do not need to
  * calculate any combinations for val 100.
+ * ----------
+ * Note that this problem could also use the Recurrence relation used in Problem 78. However, I also like this solution
+ * and both are blazing fast, so I don't see a strong reason to update it.
  */
 public class PE0076 implements Problem {
     private static final int TARGET_AMOUNT = 100;
