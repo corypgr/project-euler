@@ -2,6 +2,7 @@ package corypgr.project.euler.problems;
 
 import corypgr.project.euler.problems.util.Problem;
 import corypgr.project.euler.problems.util.ProblemSolution;
+import lombok.Value;
 
 /**
  * Problem 4
@@ -17,8 +18,8 @@ public class PE0004 implements Problem {
     public ProblemSolution solve() {
         long bestPalindromeProduct = -1;
         long lastProduct = Integer.MAX_VALUE;
-        for (int i = 999; i > 0 && i * i > bestPalindromeProduct; i--) {
-            for (int j = i; j > 0 && lastProduct > bestPalindromeProduct; j--) {
+        for (int i = 999; i >= 100 && i * i > bestPalindromeProduct; i--) {
+            for (int j = i; j >= 100 && lastProduct > bestPalindromeProduct; j--) {
                 lastProduct = i * j;
                 if (lastProduct > bestPalindromeProduct && isPalindrome(lastProduct)) {
                     bestPalindromeProduct = lastProduct;
@@ -29,7 +30,7 @@ public class PE0004 implements Problem {
         }
         return ProblemSolution.builder()
                 .solution(bestPalindromeProduct)
-                .descriptiveSolution("Best Palindrom Product: " + bestPalindromeProduct)
+                .descriptiveSolution("Best Palindrome Product: " + bestPalindromeProduct)
                 .build();
     }
 
