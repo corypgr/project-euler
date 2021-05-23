@@ -85,6 +85,7 @@ import corypgr.project.euler.problems.PE0080;
 import corypgr.project.euler.problems.PE0081;
 import corypgr.project.euler.problems.PE0082;
 import corypgr.project.euler.problems.PE0083;
+import corypgr.project.euler.problems.PE0084;
 import corypgr.project.euler.problems.util.Problem;
 import corypgr.project.euler.problems.util.ProblemSolution;
 
@@ -176,7 +177,8 @@ public class ProjectEuler {
             Map.entry(80, new PE0080()),
             Map.entry(81, new PE0081()),
             Map.entry(82, new PE0082()),
-            Map.entry(83, new PE0083())
+            Map.entry(83, new PE0083()),
+            Map.entry(84, new PE0084())
     );
 
     public static void main(String[] args) {
