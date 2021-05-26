@@ -111,7 +111,8 @@ public class ProblemSolutionTest {
                 arguments(new PE0084(), "MTAxNTI0"),
                 arguments(new PE0085(), "Mjc3Mg=="),
                 arguments(new PE0087(), "MTA5NzM0Mw=="),
-                arguments(new PE0092(), "ODU4MTE0Ng=="));
+                arguments(new PE0092(), "ODU4MTE0Ng=="),
+                arguments(new PE0097(), "ODczOTk5MjU3Nw=="));
 
         return argsWithEncodedSolution.map(args -> arguments(args.get()[0], decode((String) args.get()[1])));
     }
