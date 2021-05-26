@@ -18,7 +18,7 @@ import java.util.Arrays;
  *
  * Interesting problem. I tried calculating the numbers directly, but as I expected it took too long.
  *
- * My first thought is we should try to factor each base into f1^(exponent + n1) * f2^(exponent + n2) * ... where f* is
+ * My first thought is we should try to factor each base into f1^(exponent * n1) * f2^(exponent * n2) * ... where f* is
  * a prime factor and n* is the number of times that prime factor divides out of the base. We could then try to compare
  * the resulting exponents instead, but I don't know how to compare multiple factors against multiple factors in this
  * case...
