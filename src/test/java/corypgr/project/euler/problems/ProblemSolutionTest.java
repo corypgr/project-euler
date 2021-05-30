@@ -112,6 +112,7 @@ public class ProblemSolutionTest {
                 arguments(new PE0085(), "Mjc3Mg=="),
                 arguments(new PE0086(), "MTgxOA=="),
                 arguments(new PE0087(), "MTA5NzM0Mw=="),
+                arguments(new PE0088(), "NzU4NzQ1Nw=="),
                 arguments(new PE0089(), "NzQz"),
                 arguments(new PE0092(), "ODU4MTE0Ng=="),
                 arguments(new PE0097(), "ODczOTk5MjU3Nw=="),
