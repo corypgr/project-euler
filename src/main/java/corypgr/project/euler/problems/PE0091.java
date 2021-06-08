@@ -25,14 +25,9 @@ import java.util.stream.Stream;
  * We can use Pythagorean's theorem to tell if a triangle is a right triangle. We actually apply it a few times. First,
  * to determine the lengths of the sides (length = sqrt((x2 - x1)^2 + (y2 - y1)^2)). Then, using the largest side length
  * as c, check if a^2 + b^2 = c^2.
- *
- * Above works pretty well, and is fast. I had to play around a bit with getting my doubles equality check right though,
- * and work in some extra logic so that we didn't have the same point show up as 2 coordinates in a triangle.
  */
 public class PE0091 implements Problem {
     private static final int MAX_COORD = 50;
-    private static final double EQUALS_TOLERANCE = 0.001;
-
     private static final int[] SQUARES;
     static {
         SQUARES = new int[MAX_COORD + 1]; // plus 1 for 0 indexing.
@@ -59,28 +54,28 @@ public class PE0091 implements Problem {
             return false;
         }
 
-        double side1 = getLength(coords.getP1(), coords.getP2());
-        double side2 = getLength(coords.getP1(), coords.getP3());
-        double side3 = getLength(coords.getP2(), coords.getP3());
+        int side1Square = getLengthSquared(coords.getP1(), coords.getP2());
+        int side2Square = getLengthSquared(coords.getP1(), coords.getP3());
+        int side3Square = getLengthSquared(coords.getP2(), coords.getP3());
 
-        double a;
-        double b;
-        double c;
-        if (side1 > side2 && side1 > side3) {
-            c = side1;
-            a = side2;
-            b = side3;
-        } else if (side2 > side1 && side2 > side3) {
-            c = side2;
-            a = side1;
-            b = side3;
+        int aSquare;
+        int bSquare;
+        int cSquare;
+        if (side1Square > side2Square && side1Square > side3Square) {
+            cSquare = side1Square;
+            aSquare = side2Square;
+            bSquare = side3Square;
+        } else if (side2Square > side1Square && side2Square > side3Square) {
+            cSquare = side2Square;
+            aSquare = side1Square;
+            bSquare = side3Square;
         } else {
-            c = side3;
-            a = side1;
-            b = side2;
+            cSquare = side3Square;
+            aSquare = side1Square;
+            bSquare = side2Square;
         }
 
-        return areDoublesEqualWithTolerance((a * a) + (b * b), c * c);
+        return aSquare + bSquare == cSquare;
     }
 
     private boolean isAxisLine(TriangleCoordinates coords) {
@@ -88,17 +83,14 @@ public class PE0091 implements Problem {
                 (coords.getP1().getY() == coords.getP2().getY() && coords.getP1().getY() == coords.getP3().getY());
     }
 
-    private double getLength(Point p1, Point p2) {
+    /**
+     * The length of a side would be sqrt((x2 - x1)^2 + (y2 - y1)^2)). Since we're going to square the lengths later on
+     * we can just return the result without taking the square root.
+     */
+    private int getLengthSquared(Point p1, Point p2) {
         int xSquare = SQUARES[Math.abs(p2.getX() - p1.getX())];
         int ySquare = SQUARES[Math.abs(p2.getY() - p1.getY())];
-        return Math.sqrt(xSquare + ySquare);
-    }
-
-    /**
-     * Equality with doubles isn't too precise due to how doubles are stored.
-     */
-    private boolean areDoublesEqualWithTolerance(double a, double b) {
-        return Math.abs(a - b) < EQUALS_TOLERANCE;
+        return xSquare + ySquare;
     }
 
     private static final class TriangleCoordinateSupplier implements Supplier<TriangleCoordinates> {
