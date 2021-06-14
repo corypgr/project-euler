@@ -1,13 +1,19 @@
 package corypgr.project.euler.problems;
 
+import corypgr.project.euler.problems.prime.PrimeGenerator;
+import corypgr.project.euler.problems.util.DivisorsUtil;
 import corypgr.project.euler.problems.util.Problem;
 import corypgr.project.euler.problems.util.ProblemSolution;
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 
-import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 /**
@@ -34,19 +40,51 @@ import java.util.stream.Stream;
  * our area will be strictly increasing as well. In that case, we just need to keep track of the "next" square. If
  * s(s-a)(s-b)(s-c) < the next square then it isn't a square. If it is larger, we can calculate squares until our
  * squares are >= s(s-a)(s-b)(s-c).
+ *
+ * The above works, but is both too slow and gives overflows for integers and longs due to the large multiplications.
+ * Switching to BigIntegers makes it far too slow.
+ *
+ * After researching a little, I found the following sequence that lined up closely with the numbers I had found before
+ * overflowing: https://oeis.org/A003500 which is the sequence for Heronian triangles with consecutive sides. This was
+ * very close to the sequence I was generating where:
+ *  * Consecutive sides Sequence | Almost Equilateral Perimeter
+ *  * 14                         | 16
+ *  * 52                         | 50
+ *  * 194                        | 196
+ *  * 724                        | 722
+ *
+ * The difference was that for our solution, we alternate subtracting and adding 2 to the consecutive sides solution.
+ * Doing this by hand for the values under 1 billion actually gave me the correct solution, but this isn't satisfying,
+ * largely because I don't quite follow why they're related.
+ *
+ * Going back to researching Heronian Triangles, there are formulas for generating all Heronian Triangles provided at
+ * https://en.wikipedia.org/wiki/Heronian_triangle where you use 3 variables with GCD(m, n, k) = 1. That would probably
+ * be expensive to compute. The wiki page says it's more efficient to generate all integer triangles and check if the
+ * areas are integer values, which is what I was trying to do :P
+ *
+ * There is a special note for Isosceles Heronian Triangles, which relies only on having 2 coprime variables:
+ * https://en.wikipedia.org/wiki/Integer_triangle#Isosceles_Heronian_triangles This looks pretty promising. We can find
+ * all such variables by doing something similar to what we did in Problem 75, then run them through the 2 formulas,
+ * keeping the values where the 3 sides are v,v,v-1 or v,v,v+1.
+ *
+ * What are the possible coprime values of u and v for our isosceles Heronian Triangle formulas? With a max size of
+ * 333,333,334 and the largest side given by u^2 + v^2, sqrt(333,333,334) ~= 18,267 is a good place to start for a max u
+ * value. For a max v, we need to look at sqrt(333,333,334 / 2) ~= 12,909 since we're adding 2 squares together and
+ * u > v.
  */
 public class PE0094 implements Problem {
-    private static final int MAX_PERIMETER = 1_000_000_000;
+    private static final int MAX_SIDE_LENGTH = 333_333_334;
+    private static final int MAX_U = (int) Math.sqrt(MAX_SIDE_LENGTH);
+    private static final int MAX_V = (int) Math.sqrt(MAX_SIDE_LENGTH / 2);
 
     @Override
     public ProblemSolution solve() {
-        AreaChecker areaChecker = new AreaChecker();
-
-        int solution = Stream.generate(new TriangleSupplier())
-                .takeWhile(triangle -> triangle.getPerimeter() <= MAX_PERIMETER)
-                .filter(areaChecker::hasSquareArea)
-                .mapToInt(Triangle::getPerimeter)
+        long solution = Stream.generate(new HeronianTriangleSupplier())
+                .takeWhile(Objects::nonNull)
+                .filter(this::isAlmostEquilateral)
+                .mapToLong(Triangle::getPerimeter)
                 .sum();
+
         return ProblemSolution.builder()
                 .solution(solution)
                 .descriptiveSolution("The sum of all almost equilateral triangle perimeters with integer side lengths" +
@@ -54,31 +92,160 @@ public class PE0094 implements Problem {
                 .build();
     }
 
-    private static final class TriangleSupplier implements Supplier<Triangle> {
-        private int nextEqualLength;
+    private boolean isAlmostEquilateral(Triangle triangle) {
+        return Math.abs(triangle.getA() - triangle.getC()) == 1;
+    }
 
-        // When true, the unequalSideLength will be equalSideLength - 1. Else, it will be equalSideLength + 1.
-        private boolean nextUnequalLengthIsSmaller;
+    private static final class HeronianTriangleSupplier implements Supplier<Triangle> {
+        private final int[] valToSquareMap;
+        private final List<List<Long>> valToPrimeDivisorsMap;
 
-        public TriangleSupplier() {
-            this.nextEqualLength = 1;
+        // u > v and u + v is odd for our formulas to work.
+        private int u;
+        private int v;
 
-            // Start with false because 1,1,0 is invalid.
-            this.nextUnequalLengthIsSmaller = false;
+        // Pre-stored triangle values. We populate these and only return these values.
+        private Triangle formulaATriangle;
+        private Triangle formulaBTriangle;
+
+        public HeronianTriangleSupplier() {
+            this.valToPrimeDivisorsMap = getPrimeDivisorsMap();
+            this.valToSquareMap = getValToSquareMap();
+
+            // Start with our u > v and u + v odd conditions met.
+            this.u = 2;
+            this.v = 1;
+            setTrianglesWithUandV();
         }
 
         @Override
         public Triangle get() {
-            Triangle result = new Triangle(nextEqualLength, nextEqualLength,
-                    nextUnequalLengthIsSmaller ? nextEqualLength - 1 : nextEqualLength + 1);
+            if (formulaATriangle != null) {
+                Triangle result = formulaATriangle;
+                formulaATriangle = null;
+                return result;
+            }
+            if (formulaBTriangle != null) {
+                Triangle result = formulaBTriangle;
+                formulaBTriangle = null;
+                return result;
+            }
 
-            // Set up the next triangle value.
-            nextUnequalLengthIsSmaller = !nextUnequalLengthIsSmaller;
-            if (nextUnequalLengthIsSmaller) {
-                // Increment by 2 so that nextEqualLength is always odd, and then our perimeter is always even.
-                nextEqualLength += 2;
+            advanceUandV();
+            findNextUandV();
+            if (v > MAX_V) {
+                return null;
+            }
+
+            return get();
+        }
+
+        /**
+         * Finds the next U and V which are coprime and produce Triangles, taking into account our short-circuiting.
+         */
+        private void findNextUandV() {
+            while (v <= MAX_V && !areCoprime(u, v)) {
+                advanceUandV();
+            }
+
+            if (v > MAX_V) {
+                return;
+            }
+
+            setTrianglesWithUandV();
+            if (formulaATriangle == null && formulaBTriangle == null) {
+                rolloverV();
+                findNextUandV();
+            }
+        }
+
+        private void advanceUandV() {
+            u += 2; // Increment u by 2 to maintain our u + v is odd condition.
+            if (u > MAX_U) {
+                rolloverV();
+            }
+        }
+
+        private void rolloverV() {
+            v++;
+            u = v + 1; // Keeps u > v and u + v is odd conditions.
+        }
+
+        private boolean areCoprime(int a, int b) {
+            List<Long> aSortedPrimeDivisors = valToPrimeDivisorsMap.get(a);
+            List<Long> bSortedPrimeDivisors = valToPrimeDivisorsMap.get(b);
+            int aIndex = 0;
+            int bIndex = 0;
+            while (aIndex < aSortedPrimeDivisors.size() && bIndex < bSortedPrimeDivisors.size()) {
+                long aVal = aSortedPrimeDivisors.get(aIndex);
+                long bVal = bSortedPrimeDivisors.get(bIndex);
+
+                if (aVal == bVal) {
+                    return false;
+                } else if (aVal < bVal) {
+                    aIndex++;
+                } else {
+                    bIndex++;
+                }
+            }
+
+            // no matches found.
+            return true;
+        }
+
+        private List<List<Long>> getPrimeDivisorsMap() {
+            PrimeGenerator primeGenerator = new PrimeGenerator();
+            List<Long> primes = primeGenerator.generatePrimesList((long) Math.sqrt(MAX_U));
+            DivisorsUtil divisorsUtil = new DivisorsUtil();
+
+            List<List<Long>> result = new ArrayList<>();
+            result.add(Collections.emptyList()); // 0th element.
+
+            LongStream.rangeClosed(1, MAX_U)
+                    .mapToObj(u -> getSortedPrimeDivisors(u, divisorsUtil, primes))
+                    .forEach(result::add);
+            return result;
+        }
+
+        private List<Long> getSortedPrimeDivisors(long val, DivisorsUtil divisorsUtil, List<Long> primes) {
+            return divisorsUtil.getPrimeDivisors(val, primes).stream()
+                    .sorted()
+                    .collect(Collectors.toList());
+        }
+
+        private int[] getValToSquareMap() {
+            int[] result = new int[MAX_U + 1]; // offset 0 value.
+            for (int i = 0; i <= MAX_U; i++) {
+                result[i] = i * i;
             }
             return result;
+        }
+
+        /**
+         * Attempts to set up our triangles for the current u and v. There is short-circuiting here, were we don't set
+         * a triangle after we've passed certain thresholds. This lets us skip to higher v values more quickly. Full
+         * short-circuiting kicks in when neither triangle would be set.
+         */
+        private void setTrianglesWithUandV() {
+            int equalSides = valToSquareMap[u] + valToSquareMap[v];
+            if (equalSides > MAX_SIDE_LENGTH) {
+                // Both triangles use equalSides, so neither will be set.
+                return;
+            }
+
+            int unequalSideFormulaA = 2 * (valToSquareMap[u] - valToSquareMap[v]);
+            // The unequalSide grows faster than the equalSides here. After unequalSide > equalSides, the difference
+            // between the two will only grow larger, so we can skip setting the triangle as a signal to move to v + 1.
+            if (unequalSideFormulaA <= MAX_SIDE_LENGTH && unequalSideFormulaA <= equalSides + 1) {
+                formulaATriangle = new Triangle(equalSides, equalSides, unequalSideFormulaA);
+            }
+
+            int unequalSideFormulaB = 4 * u * v;
+            // The equalSides grow faster than the unequalSide here. After equalSides > unequalSide, the difference
+            // between the two will only grow larger, so we can skip setting the triangle as a signal to move to v + 1.
+            if (unequalSideFormulaB <= MAX_SIDE_LENGTH && equalSides <= unequalSideFormulaB + 1) {
+                formulaBTriangle = new Triangle(equalSides, equalSides, unequalSideFormulaB);
+            }
         }
     }
 
@@ -93,47 +260,6 @@ public class PE0094 implements Problem {
 
         public Triangle(int a, int b, int c) {
             this(a, b, c, a + b + c);
-        }
-    }
-
-    private static final class AreaChecker {
-        private long nextSquare;
-        private long nextSquareBase;
-
-        public AreaChecker() {
-            this.nextSquareBase = 1;
-            this.nextSquare = 1;
-        }
-
-        public boolean hasSquareArea(Triangle triangle) {
-            // We are guaranteed not to have any odd perimeters with our triangle generation logic.
-            long s = triangle.getPerimeter() / 2;
-            long areaSquared = s * (s - triangle.getA()) * (s - triangle.getB()) * (s - triangle.getC());
-            //System.out.println(areaSquared);
-            //System.out.println("perimeter: " + triangle.getPerimeter());
-            boolean square = isSquare(areaSquared);
-            if (square) {
-                System.out.println(triangle);
-                System.out.println(areaSquared);
-                return true;
-            }
-            return false;
-        }
-
-        private boolean isSquare(long val) {
-            if (val <= nextSquare) {
-                return val == nextSquare;
-            }
-
-            nextSquareBase = (long) Math.sqrt(val);
-            nextSquare = nextSquareBase * nextSquareBase;
-
-            while (val > nextSquare) {
-                nextSquareBase++;
-                nextSquare = nextSquareBase * nextSquareBase;
-            }
-
-            return isSquare(val);
         }
     }
 }
