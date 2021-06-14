@@ -93,6 +93,7 @@ import corypgr.project.euler.problems.PE0088;
 import corypgr.project.euler.problems.PE0089;
 import corypgr.project.euler.problems.PE0091;
 import corypgr.project.euler.problems.PE0092;
+import corypgr.project.euler.problems.PE0093;
 import corypgr.project.euler.problems.PE0095;
 import corypgr.project.euler.problems.PE0096;
 import corypgr.project.euler.problems.PE0097;
@@ -197,6 +198,7 @@ public class ProjectEuler {
             Map.entry(89, new PE0089()),
             Map.entry(91, new PE0091()),
             Map.entry(92, new PE0092()),
+            Map.entry(93, new PE0093()),
             Map.entry(95, new PE0095()),
             Map.entry(96, new PE0096()),
             Map.entry(97, new PE0097()),

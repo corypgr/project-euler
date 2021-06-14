@@ -25,7 +25,30 @@ public class CombinationUtil<T> {
         int maxIndex = values.size() - 1;
         while (currentIndices != null) {
             result.add(convertIndices(currentIndices, values));
-            currentIndices = getNextIndices(currentIndices, maxIndex);
+            currentIndices = getNextWithRepeatsIndices(currentIndices, maxIndex);
+        }
+        return result;
+    }
+
+    /**
+     * Returns all combinations of values with the specified number of elements. Unlike permutations, a combination
+     * is unordered. The resulting List is sorted in ascending order based on the order of passed in values.
+     */
+    public List<List<T>> getAllCombinationsWithoutRepeats(List<T> values, int numElements) {
+        if (values == null || values.size() == 0 || numElements <= 0 || values.size() < numElements) {
+            return Collections.emptyList();
+        }
+
+        List<Integer> currentIndices = new ArrayList<>(numElements);
+        for (int i = 0; i < numElements; i++) {
+            currentIndices.add(i); // Since no repeats, fill with different indices.
+        }
+
+        List<List<T>> result = new LinkedList<>();
+        int maxIndex = values.size() - 1;
+        while (currentIndices != null) {
+            result.add(convertIndices(currentIndices, values));
+            currentIndices = getNextWithoutRepeatsIndices(currentIndices, maxIndex);
         }
         return result;
     }
@@ -48,7 +71,7 @@ public class CombinationUtil<T> {
      *   111
      *   112 - 999
      */
-    private List<Integer> getNextIndices(List<Integer> currentIndices, int maxIndex) {
+    private List<Integer> getNextWithRepeatsIndices(List<Integer> currentIndices, int maxIndex) {
         for (int i = currentIndices.size() - 1; i >= 0; i--) {
             if (currentIndices.get(i) < maxIndex) {
                 int newIndexVal = currentIndices.get(i) + 1;
@@ -62,6 +85,36 @@ public class CombinationUtil<T> {
         }
 
         // All spots are set to the max already.
+        return null;
+    }
+
+    /**
+     * Basically tick up last index until it gets to maxIndex, then "roll over" to the next index. Since there are no
+     * repeats, we fill the elements after the rollover with incrementing values.
+     * Example with 9 as the maxIndex:
+     *   012
+     *   013 - 019 ? Increment the last element.
+     *   023       ? Roll over the the 1 digit, and increment remaining.
+     *   023 - 029
+     *   034       ? Same rollover idea.
+     *   035 - 089
+     *   123
+     *   123 - 789
+     */
+    private List<Integer> getNextWithoutRepeatsIndices(List<Integer> currentIndices, int maxIndex) {
+        for (int i = currentIndices.size() - 1, remaining = 0; i >= 0; i--, remaining++) {
+            if (currentIndices.get(i) < maxIndex - remaining) {
+                int newIndexStart = currentIndices.get(i) + 1;
+
+                // Fill all elements from incremented spot with increasing values.
+                for (int j = 0; j + i < currentIndices.size(); j++) {
+                    currentIndices.set(j + i, newIndexStart + j);
+                }
+                return currentIndices;
+            }
+        }
+
+        // Max values with no repeats have already been hit.
         return null;
     }
 }
