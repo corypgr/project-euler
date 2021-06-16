@@ -48,7 +48,8 @@ import java.util.List;
  * ...
  *
  * There is a pattern for s!!! s(n) = 6 * s(n - 1) - s(n - 2) - 2. Calculating s until we find one over 10^12, we can
- * find b by using our formula above.
+ * find b by using our formula above. b has the same recurrence relation as well. Since we care about the size of s, I
+ * thought solving for b after finding s was more interesting and elegant than using the recurrence to calculate both.
  */
 public class PE0100 implements Problem {
     private static final long TARGET_SIZE = 1_000_000_000_000L;
